@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CALCULADORA DE IMPORTAÇÃO</title>
+  <style>
+    body {
+      background-color: #f2f2f2;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-subtitle {
+      text-align: center;
+    }
+
+    .calculator {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    .calculator label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .calculator input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .calculator .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .calculator .actions button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .result {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .result input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      background-color: #f2f2f2;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .info-popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      display: none;
+    }
+
+    .info-popup.show {
+      display: block;
+    }
+
+    .info-popup h4 {
+      margin-top: 0;
+    }
+
+    .info-popup p {
+      margin-bottom: 10px;
+    }
+
+    .info-popup .close-button {
+      text-align: right;
+    }
+
+    .info-popup .close-button button {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .info-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+    }
+
+    .porcentagem {
+      color: red;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 600px) {
+      body {
+        zoom: 200%; !important/* Aumenta o zoom em telas menores */
+      }
+    }
+
+    /* Estilos do novo campo */
+    .field {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title-subtitle">
+      <h2>CALCULADORA DE IMPORTAÇÃO</h2>
+      <h6>Conforme <a href="http://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=131703">PORTARIA MF Nº 612, DE 29 DE JUNHO DE 2023</a>
+	  <br>e <a href="https://www.confaz.fazenda.gov.br/legislacao/convenios/2023/convenio-icms-81-23">CONVÊNIO ICMS Nº 81, DE 22 DE JUNHO DE 2023</a></h6>
+    </div>
+    <div class="calculator">
+      <div class="step step-1">
+        <label for="valorRemessa">Valor da Remessa (em dólar)<button class="info-button" onclick="exibirInformacoes('valorRemessa')">i</button></label>
+        <input type="number" id="valorRemessa" value="0">
+
+        <label for="impostoImportacao">Imposto de Importação (%)</label>
+        <input type="number" id="impostoImportacao" value="60">
+
+        <label for="icms">ICMS (%)</label>
+        <input type="number" id="icms" value="17">
+
+        <label for="cotacaoDolar">Cotação do Dólar</label>
+        <input type="number" id="cotacaoDolar" value="5">
+
+        <label for="despachoPostal">Despacho Postal</label>
+        <input type="number" id="despachoPostal" value="15.85">
+
+        <div class="actions">
+          <button onclick="calcularTributos()">Calcular</button>
+        </div>
+      </div>
+      <div class="result">
+        <p id="dadosPreenchidos"></p>
+        <div class="field">
+          <label for="despachoPostalResultado">Despacho Postal<button class="info-button" onclick="exibirInformacoes('despachoPostal')">i</button></label>
+          <input type="number" id="despachoPostalResultado" disabled>
+        </div>
+
+        <div class="field">
+          <label for="impostoImportacaoResultado">Imposto de Importação<button class="info-button" onclick="exibirInformacoes('impostoImportacao')">i</button></label>
+          <input type="number" id="impostoImportacaoResultado" disabled>
+        </div>
+
+        <div class="field">
+          <label for="baseCalculo">Base de Cálculo para ICMS<button class="info-button" onclick="exibirInformacoes('baseCalculo')">i</button></label>
+          <input type="number" id="baseCalculo" disabled>
+        </div>
+
+        <div class="field">
+          <label for="icmsDevido">ICMS Devido<button class="info-button" onclick="exibirInformacoes('icmsDevido')">i</button></label>
+          <input type="number" id="icmsDevido" disabled>
+        </div>
+
+        <div class="field">
+          <label for="valorTotalTributos">Valor Total de Tributos<button class="info-button" onclick="exibirInformacoes('valorTotalTributos')">i</button></label>
+          <input type="number" id="valorTotalTributos" disabled>
+        </div>
+
+        <div class="field">
+          <label for="valorTotalCompra">Valor Total da Compra<button class="info-button" onclick="exibirInformacoes('valorTotalCompra')">i</button></label>
+          <input type="number" id="valorTotalCompra" disabled>
+        </div>
+
+        <div class="field">
+          <label for="valorCompraMaior">Sua compra ficou mais cara em <span class="porcentagem">0</span>%</label>
+        </div>
+
+        
+        <div class="actions">
+          <button onclick="refazerCalculo()">Refazer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-popup" id="infoPopup">
+    <div class="close-button">
+      <button onclick="fecharInformacoes()">Fechar</button>
+    </div>
+    <h4 id="infoTitulo"></h4>
+    <p id="infoTexto"></p>
+  </div>
+
+  <script>
+    var step1 = document.querySelector('.step-1');
+    var result = document.querySelector('.result');
+    var dadosPreenchidos = document.getElementById('dadosPreenchidos');
+
+    var infoPopup = document.getElementById('infoPopup');
+    var infoTitulo = document.getElementById('infoTitulo');
+    var infoTexto = document.getElementById('infoTexto');
+
+    function exibirInformacoes(campo) {
+      var titulo, texto;
+
+      switch (campo) {
+        case 'valorRemessa':
+          titulo = 'Valor da Remessa';
+          texto = 'É a somatória do valor do produto + frete + seguro.';
+          break;
+        case 'despachoPostal':
+          titulo = 'Despacho Postal';
+          texto = 'Taxa cobrada pelos Correios para o desembaraço aduaneiro. Esse valor é cobrado de remessas (pacotes) em que se é utilizado um frete ordinário ou quando uma remessa é tributada.';
+          break;
+        case 'impostoImportacao':
+          titulo = 'Imposto de Importação';
+          texto = 'Também conhecido como II em sua forma abreviada, é o imposto federal aplicado em remessas internacionais. Sempre que um pacote é tributado, esse tributo será cobrado, independentemente do estado do destinatário.';
+          break;
+        case 'baseCalculo':
+          titulo = 'Base de Cálculo para ICMS';
+          texto = 'É utilizada para determinar o valor sobre o qual será aplicada a alíquota do ICMS. É calculada somando o Valor Aduaneiro com o Imposto de Importação e dividindo pelo complemento da alíquota do ICMS. Sua fórmula completa é a seguinte: Base de Cálculo = (Valor Aduaneiro + Imposto de Importação) / (1-Alíquota ICMS)';
+          break;
+        case 'icmsDevido':
+          titulo = 'ICMS Devido';
+          texto = 'O ICMS (Imposto sobre Circulação de Mercadorias e Prestação de Serviços) é um imposto estadual aplicado em todas as operações de importação desde 1 de Agosto de 2023, com uma alíquota de 17% para qualquer destino brasileiro. Sua fórmula depende da Base de Cálculo, após obter a Base de Cálculo do ICMS é aplicado a seguinte fórmula: Valor de ICMS Devido = Base Cálculo x Alíquota de ICMS';
+          break;
+        case 'valorTotalTributos':
+          titulo = 'Valor Total de Tributos';
+          texto = 'É a soma do Imposto de Importação, ICMS e Despacho Postal.';
+          break;
+        case 'valorTotalCompra':
+          titulo = 'Valor Total da Compra';
+          texto = 'É a soma do Valor da Remessa com o Valor Total de Tributos.';
+          break;
+        default:
+          titulo = '';
+          texto = '';
+          break;
+      }
+
+      infoTitulo.textContent = titulo;
+      infoTexto.textContent = texto;
+      infoPopup.classList.add('show');
+    }
+
+    function calcularTributos() {
+      var valorRemessaDolar = parseFloat(document.getElementById("valorRemessa").value);
+      var impostoImportacao = parseFloat(document.getElementById("impostoImportacao").value);
+      var icms = parseFloat(document.getElementById("icms").value);
+      var cotacaoDolar = parseFloat(document.getElementById("cotacaoDolar").value);
+      var despachoPostal = parseFloat(document.getElementById("despachoPostal").value);
+
+      var valorRemessaReal = valorRemessaDolar * cotacaoDolar;
+
+      if (valorRemessaDolar <= 50) {
+        var valorImportacao = 0;
+        var baseCalculo = 0;
+        var icmsDevido = valorRemessaReal * (icms / 100);
+        var impostoImportacao = 0;
+      } else {
+        var valorImportacao = valorRemessaReal * (impostoImportacao / 100);
+        var baseCalculo = (valorRemessaReal + valorImportacao) / (1 - (icms / 100));
+        var icmsDevido = baseCalculo * (icms / 100);
+      }
+
+      var valorTotalTributos = valorImportacao + icmsDevido + despachoPostal;
+      var valorTotalCompra = valorRemessaReal + valorTotalTributos;
+
+      var porcentagem = (valorTotalTributos / valorRemessaReal) * 100;
+
+if (valorRemessaDolar <= 50) {
+  var valorImportacao = 0;
+} else {
+  var valorImportacao = valorRemessaReal * (impostoImportacao / 100);
+}
+
+
+      document.getElementById("despachoPostalResultado").value = despachoPostal.toFixed(2);
+      document.getElementById("impostoImportacaoResultado").value = valorImportacao.toFixed(2);
+      document.getElementById("baseCalculo").value = baseCalculo.toFixed(2);
+      document.getElementById("icmsDevido").value = icmsDevido.toFixed(2);
+      document.getElementById("valorTotalTributos").value = valorTotalTributos.toFixed(2);
+      document.getElementById("valorTotalCompra").value = valorTotalCompra.toFixed(2);
+      document.querySelector('.porcentagem').textContent = porcentagem.toFixed(2);
+
+      step1.style.display = 'none';
+      result.classList.add('show');
+
+      dadosPreenchidos.innerHTML = `Para uma compra de ${valorRemessaDolar} dólares, aplicado ao imposto de importação de ${impostoImportacao}% e ICMS de ${icms}%, com a cotação do dólar em R$ ${cotacaoDolar} e com o pagamento do Despacho Postal dos Correios no valor de R$ ${despachoPostal}, teremos o seguinte resultado:`;
+
+    }
+
+    function refazerCalculo() {
+      step1.style.display = 'block';
+      result.classList.remove('show');
+    }
+
+    function fecharInformacoes() {
+      infoPopup.classList.remove('show');
+    }
+
+  </script>
+</body>
+</html>
